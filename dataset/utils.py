@@ -56,8 +56,14 @@ def get_all_keys_and_values(registers):
 
 
 def load_matlab_file(file_path):
-    mat = scipy.io.loadmat(file_path)
-    return mat
+    #print(f"  -> [Debug] Tentando carregar o arquivo: {file_path}") # <--- LINHA ADICIONADA
+    try:
+        mat = scipy.io.loadmat(file_path)
+        return mat
+    except Exception as e:
+        print(f"\n\n*** FALHA AO LER ESTE ARQUIVO: {file_path} ***")
+        print(f"*** ERRO: {e} ***\n\n")
+        raise e 
 
 
 def get_matlab_acquisition(mat, source):

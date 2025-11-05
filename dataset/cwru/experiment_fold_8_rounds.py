@@ -19,13 +19,17 @@ SEGMENT_LENGTH = 2048 #segmento tem que ser do mesmo tamanho que do utils.py
 
 
 def run_experiments(faulty_bearing='Drive End', sample_rate='12000'):
-    folds = get_list_of_folds_rauber_loca_et_al(faulty_bearing, sample_rate)
     R = 8  # rounds
     K = 4  # folds em cada round
     all_accuracies = []
 
     for round_id in range(R):
         print(f"\n=== ROUND {round_id + 1} ===")
+        folds = get_list_of_folds_rauber_loca_et_al(
+            round_id,
+            faulty_bearing, 
+            sample_rate
+        )
         round_accuracies = []
 
         for fold_id in range(K):

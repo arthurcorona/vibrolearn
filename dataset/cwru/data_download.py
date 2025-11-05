@@ -71,10 +71,10 @@ def download_dataset(config_filename='config.csv',
 if __name__ == "__main__":
     
     #print("--- INICIANDO DOWNLOAD SELETIVO DE TESTE ---")
-    #download_dataset(target_filenames=['186.mat'])
+    download_dataset(target_filenames=['118.mat'])
     
     #print("\n--- INICIANDO DOWNLOAD DE MÚLTIPLOS ARQUIVOS SELECIONADOS ---")
     #download_dataset(target_filenames=['104.mat', '172.mat'])
     
-    print("\n--- INICIANDO DOWNLOAD DE TODOS OS ARQUIVOS ---")
-    download_dataset()
+    #print("\n--- INICIANDO DOWNLOAD DE TODOS OS ARQUIVOS ---")
+    #download_dataset()
