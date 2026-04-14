@@ -1,0 +1,17 @@
+Using data augmentation
+No feature extraction method specified, using default (WaveletFeatures)
+Using classifier: RandomForestClassifier
+Running experimental setup: dataset/cwru/sehri_et_al_papers_setup.json
+### testing:
+--------------------
+-- accuracy_score --
+0.7388268156424581
+
+-- f1_macro --
+0.724939069435464
+
+-- confusion_matrix --
+[[197  40   1]
+ [ 10 223   5]
+ [ 56  75 109]]
+

@@ -1,0 +1,120 @@
+No feature extraction method specified, using default (WaveletFeatures)
+Using classifier: RandomForestClassifier
+Running experimental setup: dataset/cwru/sehri_et_al_proposed_setup.json
+### fold_0_0:
+--------------------
+-- accuracy_score --
+0.25816796953297255
+
+-- f1_macro --
+0.14427769348271438
+
+-- confusion_matrix --
+[[  29    4 1633]
+ [   1    0 1659]
+ [ 404    0 1259]]
+
+### fold_0_1:
+--------------------
+-- accuracy_score --
+0.3472634705133644
+
+-- f1_macro --
+0.20738647884497416
+
+-- confusion_matrix --
+[[1549    8  110]
+ [1273   84   26]
+ [1659    1    4]]
+
+### fold_0_2:
+--------------------
+-- accuracy_score --
+0.4896
+
+-- f1_macro --
+0.46211914257543
+
+-- confusion_matrix --
+[[ 303 1317   43]
+ [  85 1377  205]
+ [ 450  452  768]]
+
+### fold_1_0:
+--------------------
+-- accuracy_score --
+0.021255263685582514
+
+-- f1_macro --
+0.021458029945356765
+
+-- confusion_matrix --
+[[ 105 1335  223]
+ [   0    0 1660]
+ [1523  140    1]]
+
+### fold_1_1:
+--------------------
+-- accuracy_score --
+0.1279932189023098
+
+-- f1_macro --
+0.11665669008687128
+
+-- confusion_matrix --
+[[  17    0 1649]
+ [1281   67   35]
+ [ 748  402  520]]
+
+### fold_1_2:
+--------------------
+-- accuracy_score --
+0.43946367820692417
+
+-- f1_macro --
+0.389112186563264
+
+-- confusion_matrix --
+[[  91  673  903]
+ [1171  465   31]
+ [  23    0 1640]]
+
+### fold_2_0:
+--------------------
+-- accuracy_score --
+0.17110266159695817
+
+-- f1_macro --
+0.17056363095587904
+
+-- confusion_matrix --
+[[ 222  858  587]
+ [1421    1  238]
+ [ 850  188  632]]
+
+### fold_2_1:
+--------------------
+-- accuracy_score --
+0.6479082607772351
+
+-- f1_macro --
+0.5854402083747225
+
+-- confusion_matrix --
+[[1134  217  312]
+ [1026  254  103]
+ [   0    0 1663]]
+
+### fold_2_2:
+--------------------
+-- accuracy_score --
+0.42005203121873125
+
+-- f1_macro --
+0.31412112110608553
+
+-- confusion_matrix --
+[[1636   30    0]
+ [1181  462   24]
+ [1452  211    1]]
+

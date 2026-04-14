@@ -1,0 +1,121 @@
+Using data augmentation
+No feature extraction method specified, using default (WaveletFeatures)
+Using classifier: RandomForestClassifier
+Running experimental setup: dataset/cwru/sehri_et_al_proposed_setup.json
+### fold_0_0:
+--------------------
+-- accuracy_score --
+0.33734215273601925
+
+-- f1_macro --
+0.19489876281483254
+
+-- confusion_matrix --
+[[  20  703  943]
+ [   0    0 1660]
+ [   0    0 1663]]
+
+### fold_0_1:
+--------------------
+-- accuracy_score --
+0.3570216376750106
+
+-- f1_macro --
+0.20010596714154627
+
+-- confusion_matrix --
+[[1625   28   14]
+ [1307   57   19]
+ [1589   74    1]]
+
+### fold_0_2:
+--------------------
+-- accuracy_score --
+0.4922
+
+-- f1_macro --
+0.4665908630766293
+
+-- confusion_matrix --
+[[ 344 1279   40]
+ [  75 1382  210]
+ [ 458  477  735]]
+
+### fold_1_0:
+--------------------
+-- accuracy_score --
+0.01925005013033888
+
+-- f1_macro --
+0.02331511839708561
+
+-- confusion_matrix --
+[[  96 1527   40]
+ [   0    0 1660]
+ [ 986  678    0]]
+
+### fold_1_1:
+--------------------
+-- accuracy_score --
+0.13435049798686163
+
+-- f1_macro --
+0.13169385347618223
+
+-- confusion_matrix --
+[[  63   19 1584]
+ [1264   84   35]
+ [1088   95  487]]
+
+### fold_1_2:
+--------------------
+-- accuracy_score --
+0.4752851711026616
+
+-- f1_macro --
+0.43672053360767665
+
+-- confusion_matrix --
+[[ 221  793  653]
+ [1159  491   17]
+ [   0    0 1663]]
+
+### fold_2_0:
+--------------------
+-- accuracy_score --
+0.17030218130878527
+
+-- f1_macro --
+0.16824824120557216
+
+-- confusion_matrix --
+[[ 330  867  470]
+ [1422    0  238]
+ [1123   26  521]]
+
+### fold_2_1:
+--------------------
+-- accuracy_score --
+0.6362284986196645
+
+-- f1_macro --
+0.535913230647401
+
+-- confusion_matrix --
+[[1226   11  426]
+ [1156  107  120]
+ [   0    0 1663]]
+
+### fold_2_2:
+--------------------
+-- accuracy_score --
+0.3239943966379828
+
+-- f1_macro --
+0.25349593428888784
+
+-- confusion_matrix --
+[[1048  618    0]
+ [1093  571    3]
+ [ 955  709    0]]
+

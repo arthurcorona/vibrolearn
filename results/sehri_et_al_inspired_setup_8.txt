@@ -1,0 +1,42 @@
+No feature extraction method specified, using default (WaveletFeatures)
+Using classifier: RandomForestClassifier
+Running experimental setup: dataset/cwru/sehri_et_al_inspired_setup.json
+### fold_0_0:
+--------------------
+-- accuracy_score --
+0.2609741431148527
+
+-- f1_macro --
+0.15006412889699136
+
+-- confusion_matrix --
+[[  48    2 1616]
+ [   0    0 1660]
+ [ 409    0 1254]]
+
+### fold_0_1:
+--------------------
+-- accuracy_score --
+0.3483241408570216
+
+-- f1_macro --
+0.20629331584330166
+
+-- confusion_matrix --
+[[1558    6  103]
+ [1278   79   26]
+ [1658    1    5]]
+
+### fold_0_2:
+--------------------
+-- accuracy_score --
+0.4782
+
+-- f1_macro --
+0.44842148890535993
+
+-- confusion_matrix --
+[[ 274 1343   46]
+ [  78 1361  228]
+ [ 449  465  756]]
+
