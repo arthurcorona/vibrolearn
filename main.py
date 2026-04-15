@@ -28,7 +28,6 @@ if __name__ == "__main__":
         print("Using data augmentation")
         pipeline = AugmentedPipeline
 
-
     if args.feature_extraction:
         print(f"Using feature extraction method: {args.feature_extraction}")
         featextraction_method = eval(args.feature_extraction)()
