@@ -43,7 +43,7 @@ if __name__ == "__main__":
         print(f"Using classifier: {model.__class__.__name__}")
         steps.append(("classifier", model))
     elif not args.classifier:
-        model = RandomForestClassifier(random_state=42, n_estimators=300)
+        model = RandomForestClassifier(n_estimators=300)
         print("No classifier specified, using default (RandomForestClassifier)")
         steps.append(("classifier", model))
 
