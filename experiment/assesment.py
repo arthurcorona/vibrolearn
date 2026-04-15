@@ -52,26 +52,22 @@ def run_experiment(model, experimental_setup):
     list_of_metrics = get_list_of_metrics()
     scores = {}
     if experimental_setup["type"] == "train_test_split":
-        scores["testing"] = perform_holdout_experiment(model, experimental_setup, list_of_metrics, scores)
+        perform_holdout_experiment(model, experimental_setup, list_of_metrics, scores)
     elif experimental_setup["type"] == "cross_validation":
-        scores = perform_experimental_cross_validation(model, experimental_setup, list_of_metrics, scores)
+        perform_experimental_cross_validation(model, experimental_setup, list_of_metrics, scores)
     return scores
 
 
 def perform_holdout_experiment(model, experimental_setup, list_of_metrics, scores):
     for combination_key in experimental_setup["setup"]:
         folds = get_folds(experimental_setup["setup"], combination_key, experimental_setup["config_file"])
-        holdout_scores = holdout(model, folds, test_fold_key="testing", list_of_metrics=list_of_metrics)
-        scores = scores | holdout_scores
-    return scores
+        scores[combination_key] = holdout(model, folds, test_fold_key="testing", list_of_metrics=list_of_metrics)
 
 
 def perform_experimental_cross_validation(model, experimental_setup, list_of_metrics, scores):
     for combination_key in experimental_setup["setup"]:
         folds = get_folds(experimental_setup["setup"], combination_key, experimental_setup["config_file"])
-        fold_scores = cross_validation(model, folds, list_of_metrics)
-        scores = scores | fold_scores
-    return scores
+        scores = scores | cross_validation(model, folds, list_of_metrics)
 
 
 def print_dict_of_scores(scores):
