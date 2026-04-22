@@ -1,81 +1,108 @@
-from estimators.pipeline import Pipeline
+from estimators.pipeline import Pipeline, load_function
 from dataset.utils import filter_registers_by_key_value_sequence, get_acquisition_data, get_values_by_key, load_matlab_acquisition, prepare_segments_and_targets
 import numpy as np
+from time import time
 
 
 class AugmentedPipeline(Pipeline):
     def train(self, list_of_registers, experimental_setup):
         self.experimental_setup = experimental_setup
-        X, y = augment_acquisition(list_of_registers, self.experimental_setup)
+        start = time()
+        X_ori, y_ori = load_function(list_of_registers, self.experimental_setup)
+        end = time()
+        self.scores["load_data_time"] = end - start
+        # print(f"Original dataset size: {X_ori.shape, y_ori.shape, set(y_ori)}")
+        start = time()
+        X_aug, y_aug = get_agumented_data(list_of_registers, self.experimental_setup, 3)
+        end = time()
+        self.scores["data_augmentation_time"] = end - start
+        # print(f"Augmented dataset size: {X_aug.shape, y_aug.shape, set(y_aug)}")
+        X = np.concatenate([X_ori, X_aug], axis=0)
+        y = np.concatenate([y_ori, y_aug], axis=0)
+        # print(f"Total augmented dataset size: {X.shape, y.shape, set(y)}")
+        start = time()
         self.pipe.fit(X, y)
+        end = time()
+        self.scores["training_time"] = end - start
         return self
 
 
-def augment_acquisition(list_of_registers, experimental_setup):
-    conditions = sorted(list(get_values_by_key(list_of_registers, "condition")))
-    loads = sorted(list(get_values_by_key(list_of_registers, "load")))
-    X, y, = [], [],
-    for load in loads:
-        X, y = aggregate_condition_data(list_of_registers, conditions, load, experimental_setup)
+def get_agumented_data(list_of_registers, experimental_setup, repetitions):
+    X, y = [], []
+    for _ in range(repetitions):
+        X_aug, y_aug = augment_acquisition(list_of_registers, experimental_setup)
+        X.append(X_aug)
+        y.append(y_aug)
     X = np.concatenate(X, axis=0)
     y = np.concatenate(y, axis=0)
-    # print(f"Total augmented dataset size: {X.shape, y.shape, set(y)}")
     return X, y
 
 
-def aggregate_condition_data(list_of_registers, conditions, load, experimental_setup):
-    X_condition, y_condition = [], []
+def augment_acquisition(list_of_registers, experimental_setup):
+    conditions = get_values_by_key(list_of_registers, "condition")
+    X, y, = [], []
     for condition in conditions:
+        X_agregated, y_agregated = aggregate_load_acquistions(list_of_registers, condition, experimental_setup)
+        X.append(X_agregated)
+        y.append(y_agregated)
+    X = np.concatenate(X, axis=0)
+    y = np.concatenate(y, axis=0)
+    return X, y
+
+
+def aggregate_load_acquistions(list_of_registers, condition, experimental_setup):
+    X, y = [], []
+    loads = (list(get_values_by_key(list_of_registers, "load")))
+    for load in loads:
         condition_registers = filter_registers_by_key_value_sequence(list_of_registers, [("condition", [condition]), ("load", [load])])
         if len(condition_registers) == 0:
             continue
-        X_severity, y_severity = mix_severity_data(condition_registers, experimental_setup)
-        X_condition.append(X_severity)
-        y_condition.append(y_severity)
-    return X_condition,y_condition
+        X_mixed, y_mixed = mix_severity_data(condition_registers, experimental_setup)
+        X.append(X_mixed)
+        y.append(y_mixed)
+    X = np.concatenate(X, axis=0)
+    y = np.concatenate(y, axis=0)
+    return X,y
 
 
 def mix_severity_data(condition_registers, experimental_setup):
-    severity_acquisitions, severity_registers = [], []
-    severity_levels = get_values_by_key(condition_registers, "severity")
-    severity_levels = list(set(severity_levels))
+    segment_length=experimental_setup["segment_length"]
+    acquisitions = []
+    X, y = [], []
+    for condition_register in condition_registers:
+        acquisition = load_original_acquisitions(condition_register, experimental_setup)
+        acquisitions.append(acquisition)
+    for i in range(len(acquisitions)-1):
+        for j in range(i+1, len(acquisitions)):
+            mixed_acquisition = mix_two_acquisitions(acquisitions[i], acquisitions[j])
+            X_mix, y_mix = prepare_segments_and_targets(segment_length=segment_length, register=condition_registers[i], acquisition=mixed_acquisition)
+            X.append(X_mix)
+            y.append(y_mix)
+    X = np.concatenate(X, axis=0)
+    y = np.concatenate(y, axis=0)
+    return X, y
 
-    X_severity, y_severity = prepare_severity_segments(condition_registers, severity_acquisitions, severity_registers, severity_levels, experimental_setup)
 
-    generate_mixed_segments(condition_registers, severity_acquisitions, severity_levels, X_severity, y_severity, experimental_setup)
-
-    X_severity = np.concatenate(X_severity, axis=0)
-    y_severity = np.concatenate(y_severity, axis=0)
-    return X_severity,y_severity
-
-
-def prepare_severity_segments(condition_registers, severity_acquisitions, severity_registers, severity_levels, experimental_setup):
+def load_original_acquisitions(condition_register, experimental_setup):
     raw_dir_path=experimental_setup["raw_dir_path"]
     channels_columns=experimental_setup["channels_columns"]
     load_acquisition_func=eval(experimental_setup["load_acquisition_func"])
-    segment_length=experimental_setup["segment_length"]
-    
-    X_severity, y_severity = [], []
-    for severity in severity_levels:
-        severity_registers.append(filter_registers_by_key_value_sequence(condition_registers, [("severity", [severity])])[0])
-
-        acquisition = get_acquisition_data(raw_dir_path, channels_columns, load_acquisition_func, severity_registers[-1])
-        severity_acquisitions.append(acquisition)
-
-        X, y = prepare_segments_and_targets(segment_length=segment_length, register=severity_registers[-1], acquisition=acquisition)
-        X_severity.append(X)
-        y_severity.append(y)
-    return X_severity,y_severity
+    acquisition = get_acquisition_data(raw_dir_path, channels_columns, load_acquisition_func, condition_register)
+    return acquisition
 
 
 def generate_mixed_segments(condition_registers, severity_acquisitions, severity_levels, X_severity, y_severity, experimental_setup):
     segment_length=experimental_setup["segment_length"]
+    X, y = [], []
     for i in range(len(severity_levels)-1):
         for j in range(i+1, len(severity_levels)):
-            X_mix = mix_two_acquisitions(severity_acquisitions[i], severity_acquisitions[j])
-            X, y = prepare_segments_and_targets(segment_length=segment_length, register=condition_registers[i], acquisition=X_mix)
-            X_severity.append(X)
-            y_severity.append(y)
+            mixed_acquisition = mix_two_acquisitions(severity_acquisitions[i], severity_acquisitions[j])
+            X_mix, y_mix = prepare_segments_and_targets(segment_length=segment_length, register=condition_registers[i], acquisition=mixed_acquisition)
+            X.append(X_mix)
+            y.append(y_mix)
+    X = np.concatenate(X, axis=0)
+    y = np.concatenate(y, axis=0)
+    return X, y
 
 
 def mix_two_acquisitions(acq1, acq2):
