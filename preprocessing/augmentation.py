@@ -7,23 +7,25 @@ from time import time
 class AugmentedPipeline(Pipeline):
     def train(self, list_of_registers, experimental_setup):
         self.experimental_setup = experimental_setup
+
         start = time()
         X_ori, y_ori = load_function(list_of_registers, self.experimental_setup)
         end = time()
         self.scores["load_data_time"] = end - start
-        # print(f"Original dataset size: {X_ori.shape, y_ori.shape, set(y_ori)}")
+
         start = time()
         X_aug, y_aug = get_agumented_data(list_of_registers, self.experimental_setup, 3)
         end = time()
         self.scores["data_augmentation_time"] = end - start
-        # print(f"Augmented dataset size: {X_aug.shape, y_aug.shape, set(y_aug)}")
+
         X = np.concatenate([X_ori, X_aug], axis=0)
         y = np.concatenate([y_ori, y_aug], axis=0)
-        # print(f"Total augmented dataset size: {X.shape, y.shape, set(y)}")
+
         start = time()
         self.pipe.fit(X, y)
         end = time()
         self.scores["training_time"] = end - start
+
         return self
 
 
@@ -43,6 +45,8 @@ def augment_acquisition(list_of_registers, experimental_setup):
     X, y, = [], []
     for condition in conditions:
         X_agregated, y_agregated = aggregate_load_acquistions(list_of_registers, condition, experimental_setup)
+        if X_agregated is None or y_agregated is None:
+            continue
         X.append(X_agregated)
         y.append(y_agregated)
     X = np.concatenate(X, axis=0)
@@ -55,11 +59,13 @@ def aggregate_load_acquistions(list_of_registers, condition, experimental_setup)
     loads = (list(get_values_by_key(list_of_registers, "load")))
     for load in loads:
         condition_registers = filter_registers_by_key_value_sequence(list_of_registers, [("condition", [condition]), ("load", [load])])
-        if len(condition_registers) == 0:
+        if len(condition_registers) <= 1:
             continue
         X_mixed, y_mixed = mix_severity_data(condition_registers, experimental_setup)
         X.append(X_mixed)
         y.append(y_mixed)
+    if len(X) == 0 or len(y) == 0:
+        return None, None
     X = np.concatenate(X, axis=0)
     y = np.concatenate(y, axis=0)
     return X,y
@@ -111,4 +117,3 @@ def mix_two_acquisitions(acq1, acq2):
     xf1, xf2 = np.fft.rfft(acq1, axis=0), np.fft.rfft(acq2, axis=0)
     xf_mix = (xf1 + xf2)
     return np.fft.irfft(xf_mix, n=max(acq1.shape[0], acq2.shape[0]), axis=0)
-
