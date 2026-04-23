@@ -1,8 +1,8 @@
 from sklearn.pipeline import Pipeline as SklearnPipeline
 from dataset.utils import get_X_y, load_matlab_acquisition
-from time import time
+from timed_decorator.simple_timed import timed
 
-
+@timed(return_time=True, use_seconds=True)
 def load_function(registers, experimental_setup):
     raw_dir_path=experimental_setup["raw_dir_path"]
     channels_columns=experimental_setup["channels_columns"]
@@ -16,6 +16,14 @@ def load_function(registers, experimental_setup):
     return X, y
 
 
+@timed(return_time=True, use_seconds=True)
+def timed_fit(pipe, X, y):
+    return pipe.fit(X, y)
+
+@timed(return_time=True, use_seconds=True)
+def timed_predict(pipe, X):
+    return pipe.predict(X)
+
 class Pipeline():
     def __init__(self, steps):
         self.pipe = SklearnPipeline(steps)
@@ -23,22 +31,16 @@ class Pipeline():
   
     def train(self, list_of_registers, experimental_setup):
         self.experimental_setup = experimental_setup
-        start = time()
-        X, y = load_function(list_of_registers, self.experimental_setup)
-        end = time()
-        self.scores["load_data_time"] = end - start
-        start = time()
-        self.pipe.fit(X, y)
-        end = time()
-        self.scores["training_time"] = end - start
+        (X, y), load_time = load_function(list_of_registers, self.experimental_setup)
+        self.scores["load_data_time"] = load_time
+        _, training_time = timed_fit(self.pipe, X, y)
+        self.scores["training_time"] = training_time
         return self
     
     def evaluate(self, list_of_registers, list_of_metrics):
-        X, y = load_function(list_of_registers, self.experimental_setup)
-        start = time()
-        y_pred = self.pipe.predict(X)
-        end = time()
-        self.scores["prediction_time"] = end - start
+        (X, y), _ = load_function(list_of_registers, self.experimental_setup)
+        y_pred, prediction_time = timed_predict(self.pipe, X)
+        self.scores["prediction_time"] = prediction_time
         scores = {}
         for metric in list_of_metrics:
             scores[metric.__name__] = metric(y, y_pred)

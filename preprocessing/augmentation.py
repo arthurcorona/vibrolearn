@@ -1,34 +1,29 @@
-from estimators.pipeline import Pipeline, load_function
+from estimators.pipeline import Pipeline, load_function, timed_fit
 from dataset.utils import filter_registers_by_key_value_sequence, get_acquisition_data, get_values_by_key, load_matlab_acquisition, prepare_segments_and_targets
 import numpy as np
-from time import time
+from timed_decorator.simple_timed import timed
 
 
 class AugmentedPipeline(Pipeline):
     def train(self, list_of_registers, experimental_setup):
         self.experimental_setup = experimental_setup
-
-        start = time()
-        X_ori, y_ori = load_function(list_of_registers, self.experimental_setup)
-        end = time()
-        self.scores["load_data_time"] = end - start
-
-        start = time()
-        X_aug, y_aug = get_agumented_data(list_of_registers, self.experimental_setup, 3)
-        end = time()
-        self.scores["data_augmentation_time"] = end - start
-
-        X = np.concatenate([X_ori, X_aug], axis=0)
-        y = np.concatenate([y_ori, y_aug], axis=0)
-
-        start = time()
-        self.pipe.fit(X, y)
-        end = time()
-        self.scores["training_time"] = end - start
-
+        (X, y), load_time = load_augmented_data(list_of_registers, self.experimental_setup)
+        self.scores["load_data_time"] = load_time
+        _, training_time = timed_fit(self.pipe, X, y)
+        self.scores["training_time"] = training_time
         return self
 
 
+@timed(return_time=True, use_seconds=True)
+def load_augmented_data(list_of_registers, experimental_setup):
+        (X_aug, y_aug), _ = get_agumented_data(list_of_registers, experimental_setup, 3)
+        (X_ori, y_ori), _ = load_function(list_of_registers, experimental_setup)
+        X = np.concatenate([X_ori, X_aug], axis=0)
+        y = np.concatenate([y_ori, y_aug], axis=0)
+        return X, y
+
+
+@timed(return_time=True, use_seconds=True)
 def get_agumented_data(list_of_registers, experimental_setup, repetitions):
     X, y = [], []
     for _ in range(repetitions):
@@ -95,20 +90,6 @@ def load_original_acquisitions(condition_register, experimental_setup):
     load_acquisition_func=eval(experimental_setup["load_acquisition_func"])
     acquisition = get_acquisition_data(raw_dir_path, channels_columns, load_acquisition_func, condition_register)
     return acquisition
-
-
-def generate_mixed_segments(condition_registers, severity_acquisitions, severity_levels, X_severity, y_severity, experimental_setup):
-    segment_length=experimental_setup["segment_length"]
-    X, y = [], []
-    for i in range(len(severity_levels)-1):
-        for j in range(i+1, len(severity_levels)):
-            mixed_acquisition = mix_two_acquisitions(severity_acquisitions[i], severity_acquisitions[j])
-            X_mix, y_mix = prepare_segments_and_targets(segment_length=segment_length, register=condition_registers[i], acquisition=mixed_acquisition)
-            X.append(X_mix)
-            y.append(y_mix)
-    X = np.concatenate(X, axis=0)
-    y = np.concatenate(y, axis=0)
-    return X, y
 
 
 def mix_two_acquisitions(acq1, acq2):
